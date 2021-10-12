@@ -41,8 +41,12 @@ add_executable(
     print_dtrela
     print_dtrela.cc
     )
+
 add_executable(renamer renamer_main.cc)
 target_link_libraries(renamer sold_lib glog)
+
+add_executable(reorder_phdrs reorder_phdrs.cc)
+target_link_libraries(reorder_phdrs sold_lib glog)
 
 target_link_libraries(print_dtrela sold_lib glog)
 
