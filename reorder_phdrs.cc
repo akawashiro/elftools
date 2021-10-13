@@ -4,13 +4,45 @@
 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
-    CHECK(optind + 1 == argc);
-    std::string input = argv[optind];
-    std::string output = input + ".reorderd";
+
+    std::string input, output, order;
+
+    static option long_options[] = {
+        {"input", required_argument, nullptr, 'i'},
+        {"output", required_argument, nullptr, 'o'},
+        {"order", required_argument, nullptr, 'r'},
+        {0, 0, 0, 0},
+    };
+    int opt;
+    while ((opt = getopt_long(argc, argv, "i:o:r:", long_options, nullptr)) != -1) {
+        switch (opt) {
+            case 'i':
+                input = optarg;
+                break;
+            case 'o':
+                output = optarg;
+                break;
+            case 'r':
+                order = optarg;
+                break;
+        }
+    }
+
+    CHECK(!input.empty());
+    CHECK(!output.empty());
+    CHECK(!order.empty());
+
+    std::vector<int> new_pdhrs_order;
+    {
+        std::stringstream ss(order);
+        while (ss.good()) {
+            std::string substr;
+            getline(ss, substr, ',');
+            new_pdhrs_order.push_back(std::stoi(substr));
+        }
+    }
 
     auto bin = ReadELF(input);
-    int i_phdr = 1, j_phdr = 2;
-    std::vector<int> new_pdhrs_order = {3, 1, 2, 0, 4, 5, 6, 7, 8, 9};
     CHECK_EQ(new_pdhrs_order.size(), bin->phdrs().size());
     std::vector<Elf_Phdr> tmp_phdrs;
     for (int i = 0; i < new_pdhrs_order.size(); i++) {
